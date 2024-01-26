@@ -69,15 +69,14 @@ class MockInterceptor extends Interceptor {
     String? resData;
     Map<String, dynamic>? template = route['template'];
     Map<String, dynamic>? vars = route['vars'];
-    Map<String, dynamic>? data = route['data'];
+    dynamic? data = route['data'];
 
-    var exContext = {
-    };
+    var exContext = {};
 
     if (vars != null) {
       exContext.addAll(vars);
     }
-    
+
     if (template != null && data == null) {
       resData = _templateData(template, exContext);
     } else if (data != null) {
@@ -109,11 +108,12 @@ class MockInterceptor extends Interceptor {
 
       if (vars != null) {
         vars.entries.forEach((element) {
-            var vKey = element.key;
-            var vValue = element.value;
-            if (vValue is Iterable || vValue is Map) {
-              resData = resData?.replaceAll(RegExp(r'"\$\{' + vKey + '\}"'), json.encode(vValue));
-            }
+          var vKey = element.key;
+          var vValue = element.value;
+          if (vValue is Iterable || vValue is Map) {
+            resData = resData?.replaceAll(
+                RegExp(r'"\$\{' + vKey + '\}"'), json.encode(vValue));
+          }
         });
 
         var exTemplate = Template(
@@ -125,13 +125,14 @@ class MockInterceptor extends Interceptor {
     }
 
     handler.resolve(Response(
-      data: resData,
+      data: resData != null ? json.decode(resData!) : null,
       requestOptions: options,
       statusCode: statusCode,
     ));
   }
 
-  String? _templateData(Map<String, dynamic> template, Map<dynamic, dynamic> exContext) {
+  String? _templateData(
+      Map<String, dynamic> template, Map<dynamic, dynamic> exContext) {
     var content = template['content'];
     if (content == null) {
       return content;
